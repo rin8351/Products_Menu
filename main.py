@@ -6,7 +6,22 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
 from PyQt5.QtCore import Qt, QDate
 from PyQt5.QtGui import QColor, QIcon, QPalette
 
+# Константы для путей к файлам
+PROTEIN_FILE = "protein.txt"
+FAT_FILE = "fat.txt"
+VEGET_FILE = "veget.txt"
+CEREALS_FILE = "cereals.txt"
+FRUITS_FILE = "fruits.txt"
+CONSUMPTION_FILE = "consumption.json"
+ICON_FILE = "icon.png"
+
 class FoodTrackingApp(QWidget):
+    """
+    Приложение для отслеживания употребления продуктов питания.
+    
+    Помогает не забывать о разнообразии в рационе, показывая какие продукты 
+    давно не употреблялись через цветовую индикацию (от красного к зеленому).
+    """
     def __init__(self):
         super().__init__()
         self.consumption = {}
@@ -14,7 +29,7 @@ class FoodTrackingApp(QWidget):
         self.load_food_items()
         self.load_consumption()
         self.initUI()
-        self.setWindowIcon(QIcon('icon.png'))
+        self.setWindowIcon(QIcon(ICON_FILE))
         self.apply_custom_style()
 
     def initUI(self):
@@ -24,11 +39,11 @@ class FoodTrackingApp(QWidget):
         top_layout = QHBoxLayout()
         
         # Food category checkboxes
-        self.protein_group = self.create_checkbox_group("Белки", "protein.txt")
-        self.fat_group = self.create_checkbox_group("Жиры", "fat.txt")
-        self.veget_group = self.create_checkbox_group("Овощи", "veget.txt")
-        self.cereals_group = self.create_checkbox_group("Крупы", "cereals.txt")
-        self.carbs_group = self.create_checkbox_group("Фрукты", "fruits.txt")
+        self.protein_group = self.create_checkbox_group("Белки", PROTEIN_FILE)
+        self.fat_group = self.create_checkbox_group("Жиры", FAT_FILE)
+        self.veget_group = self.create_checkbox_group("Овощи", VEGET_FILE)
+        self.cereals_group = self.create_checkbox_group("Крупы", CEREALS_FILE)
+        self.carbs_group = self.create_checkbox_group("Фрукты", FRUITS_FILE)
         
         top_layout.addWidget(self.protein_group)
         top_layout.addWidget(self.fat_group)
@@ -105,7 +120,7 @@ class FoodTrackingApp(QWidget):
         return group_box
 
     def load_food_items(self):
-        files = ["protein.txt", "fat.txt", "veget.txt", "cereals.txt", "fruits.txt"]
+        files = [PROTEIN_FILE, FAT_FILE, VEGET_FILE, CEREALS_FILE, FRUITS_FILE]
         for file in files:
             with open(file, 'r', encoding='utf-8') as f:
                 for line in f:
@@ -217,6 +232,10 @@ class FoodTrackingApp(QWidget):
         self.calendar.setPalette(calendar_palette)
 
     def get_color_for_days(self, days):
+        """
+        Вычисляет цвет для продукта в зависимости от количества дней с последнего употребления.
+        Градиент от зеленого (недавно) до красного (давно не употреблялось).
+        """
         if days > 0:  # Будущая дата
             return QColor(200, 200, 200)  # Серый цвет
         
@@ -225,8 +244,6 @@ class FoodTrackingApp(QWidget):
             return QColor(255, 0, 0) 
         elif days > 22:
             return QColor(255, 28, 0)
-        elif days > 22:
-            return QColor(255, 57, 0)
         elif days > 20:
             return QColor(255, 85, 0)
         elif days > 18:
@@ -252,7 +269,7 @@ class FoodTrackingApp(QWidget):
         
     def load_consumption(self):
         try:
-            with open('consumption.json', 'r', encoding='utf-8') as f:
+            with open(CONSUMPTION_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 self.consumption = data['consumption']
                 self.last_consumed = data['last_consumed']
@@ -260,7 +277,7 @@ class FoodTrackingApp(QWidget):
             print("Файл consumption.json не найден. Создаем новые словари.")
 
     def save_consumption(self):
-        with open('consumption.json', 'w', encoding='utf-8') as f:
+        with open(CONSUMPTION_FILE, 'w', encoding='utf-8') as f:
             json.dump({
                 'consumption': self.consumption,
                 'last_consumed': self.last_consumed
